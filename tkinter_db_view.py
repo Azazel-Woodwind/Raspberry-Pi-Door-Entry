@@ -141,7 +141,7 @@ class TableView(tk.Frame):
 
     def add_photos(self):
         self.details = filedialog.askopenfilenames(
-            initialdir="/home/azazel/Documents/python_projects/face_recog",
+            initialdir="~",
             title="Select file", filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
         record_num = self.rbuttons.get_int_var()
 

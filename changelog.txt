@@ -1,0 +1,13 @@
+09/08/2020
+
+Version 1.0:
+- Created application
+- Added main.py and all its components (tkinter_db_view.py and tkinter_login.py) as database login and management
+- Added encode_faces.py to encode faces newly added to the db for later comparison
+- Added email_sender.py to send email on command
+- Added recognise_faces.py to recognise and compare faces in photo captured
+- Added process.py to link recognise_faces.py and email_sender.py
+- Added test1.sh to test camera functionality
+
+Version 1.0.1:
+- Changed initial directory when choosing photos to ~ so portable.
