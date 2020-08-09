@@ -19,16 +19,16 @@
 
   - ALTERNATIVELY, if you have an NVIDIA graphics card (which supports CUDA) and would like to test the functionality on your desktop, compile dlib from source with the following commands:
 
-```bash
-$ git clone https://github.com/davisking/dlib.git
-$ cd dlib
-$ mkdir build
-$ cd build
-$ cmake .. -DDLIB_USE_CUDA=1 -DUSE_AVX_INSTRUCTIONS=1
-$ cmake --build .
-$ cd ..
-$ python setup.py install --yes USE_AVX_INSTRUCTIONS --yes DLIB_USE_CUDA
-```
+    ```bash
+    $ git clone https://github.com/davisking/dlib.git
+    $ cd dlib
+    $ mkdir build
+    $ cd build
+    $ cmake .. -DDLIB_USE_CUDA=1 -DUSE_AVX_INSTRUCTIONS=1
+    $ cmake --build .
+    $ cd ..
+    $ python setup.py install --yes USE_AVX_INSTRUCTIONS --yes DLIB_USE_CUDA
+    ```
 
 ###### Face_recognition install:
 
@@ -43,7 +43,7 @@ $ python setup.py install --yes USE_AVX_INSTRUCTIONS --yes DLIB_USE_CUDA
 
 ###### Pillow install:
 
- - If Pillow is not installed, run pip install Pillow.
+ - If Pillow is not installed, run `pip install Pillow`.
  - Pillow is a popular module that we use to load images.
 
 ###### Configuring emails:
