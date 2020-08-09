@@ -1,0 +1,6 @@
+*.p
+*.jpg
+*.db
+notes
+testing.py
+.vscode
