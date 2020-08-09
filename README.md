@@ -13,7 +13,7 @@
 
 ###### Dlib install:
 
- - Follow the instructions [here](https://www.pyimagesearch.com/2018/01/22/install-dlib-easy-complete-guide/v) to install dlib for your OS. 
+ - Follow the instructions [here](https://www.pyimagesearch.com/2018/01/22/install-dlib-easy-complete-guide/) to install dlib for your OS. 
 
 - We will be indirectly using dlib as our method of face recognition.
 
