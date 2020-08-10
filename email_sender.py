@@ -3,12 +3,13 @@ import imghdr
 from email.message import EmailMessage
 from datetime import datetime
 import sqlite3
+import os
 
 
 def send(name):
 
-    SENDER = "onsokunosonikkuda@gmail.com"
-    PASS = "UpToTheTimes"
+    SENDER = os.environ.get("sender_email")
+    PASS = os.environ.get("sender_pass")
 
     with sqlite3.connect("logins.db") as db:
 

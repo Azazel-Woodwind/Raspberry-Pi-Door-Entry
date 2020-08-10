@@ -11,3 +11,6 @@ Version 1.0:
 
 Version 1.0.1:
 - Changed initial directory when choosing photos to ~ so portable.
+
+Version 1.0.2:
+ - Added environment variables as forgot to do that last time
