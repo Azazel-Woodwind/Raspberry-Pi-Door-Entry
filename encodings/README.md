@@ -1,0 +1,1 @@
+## This directory will be used to store the encodings of known faces

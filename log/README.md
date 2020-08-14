@@ -1,0 +1,1 @@
+## This directory will contain log text files keeping track of when the doorbell has been triggered

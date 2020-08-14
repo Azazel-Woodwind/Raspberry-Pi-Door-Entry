@@ -1,0 +1,1 @@
+## This directory will be used to store temporary images that the GUI uses to load images and the raspberry pi uses to store the captured photo for later analysis
