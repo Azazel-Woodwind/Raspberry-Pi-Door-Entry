@@ -2,6 +2,7 @@
 *.jpg
 *.JPG
 *.png
+!Pi_diagram.png
 *.db
 notes
 testing.py
