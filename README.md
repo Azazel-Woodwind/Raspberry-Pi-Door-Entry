@@ -85,8 +85,7 @@ To recognise a face, the software must have a repository of known faces to compa
 
 3. If you would like to fully test the device using your raspberry pi, camera module, receiver and doorbell, please connect the receiver as shown below.
 
-![Pi diagram]
-(http://fav.me/de34x9d)
+![Pi diagram](https://github.com/Azazel-Woodwind/Raspberry-Pi-Door-Entry/blob/master/pi_diagram.png)
 
 The red wire connects to 5 volt + on the Pi, the black wire connects to GND & the yellow wire
 connects to GPIO 27 (which in WiringPi-speak is confusingly referred to as GPIO 2)
