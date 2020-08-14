@@ -2,12 +2,50 @@ import tkinter as tk
 import sqlite3
 from tkinter_login import Login, Register
 from tkinter_db_view import TableView, EditForm, AddForm, PhotoView, Form, RadioButtons, Options, Table
+import os
 
 
 class App(tk.Tk):
 
     def __init__(self, *args, **kw):
         tk.Tk.__init__(self, *args, **kw)
+
+        self.title("Database")
+
+        with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
+
+            cursor = db.cursor()
+
+            cursor.execute("""CREATE TABLE IF NOT EXISTS people (
+                            person_id INTEGER PRIMARY KEY,
+                            first_name TEXT,
+                            last_name TEXT,
+                            email TEXT
+                            )""")
+
+            db.commit()
+
+            cursor.execute("""CREATE TABLE IF NOT EXISTS images (
+                            image BLOB,
+                            person_id INTEGER,
+                            FOREIGN KEY (person_id)
+                                REFERENCES people (person_id)
+                                    ON UPDATE CASCADE
+                                    ON DELETE CASCADE
+                            )""")
+
+            db.commit()
+
+        with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
+
+            cursor = db.cursor()
+
+            cursor.execute("""CREATE TABLE IF NOT EXISTS details (
+                            email TEXT NOT NULL,
+                            password TEXT NOT NULL,
+                            receive INTEGER NOT NULL)""")
+
+            db.commit()
 
         self.update_details()
         self.update_logins()
@@ -35,7 +73,7 @@ class App(tk.Tk):
             self.first = False
 
     def update_details(self):
-        with sqlite3.connect("test.db") as db:
+        with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
             cur = db.cursor()
 
@@ -60,7 +98,7 @@ class App(tk.Tk):
         return blob
 
     def update_logins(self):
-        with sqlite3.connect("logins.db") as db:
+        with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
 
             cur = db.cursor()
 

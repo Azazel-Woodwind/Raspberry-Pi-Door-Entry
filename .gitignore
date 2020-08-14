@@ -1,6 +1,9 @@
 *.p
 *.jpg
+*.JPG
+*.png
 *.db
 notes
 testing.py
 .vscode
+sqlite_tests.py

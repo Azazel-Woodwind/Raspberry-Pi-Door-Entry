@@ -14,3 +14,21 @@ Version 1.0.1:
 
 Version 1.0.2:
  - Added environment variables as forgot to do that last time
+
+ Version 1.2:
+  - Created project structure and changed file directories in scripts where appropriate
+    - Added src folder
+    - Added temp_images folder
+    - Added log folder
+    - Added known faces folder
+    - Added encodings folder
+    - Added databases folder
+    - Added known_faces folder
+  - Renamed database of people details to authorised_persons
+  - Renamed test1.sh to test_photos.sh
+  - Added receiver.sh to link with doorbell
+  - Added 433Utils folder for doorbell signal processing to link with receiver module
+  - Removed sqlite_tests.py 
+  - Updated .gitignore
+  - Updated README.md for doorbell use
+  - Added title to database GUI

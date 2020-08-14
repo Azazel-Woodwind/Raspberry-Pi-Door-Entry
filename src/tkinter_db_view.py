@@ -3,6 +3,7 @@ from tkinter import messagebox, filedialog
 import sqlite3
 from PIL import Image
 import encode_faces
+import os
 
 
 class App(tk.Tk):
@@ -10,7 +11,7 @@ class App(tk.Tk):
     def __init__(self, *args, **kw):
         tk.Tk.__init__(self, *args, **kw)
 
-        with sqlite3.connect("test.db") as db:
+        with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
             cursor = db.cursor()
 
@@ -53,7 +54,7 @@ class App(tk.Tk):
         self.show_frame("TableView")
 
     def update_details(self):
-        with sqlite3.connect("test.db") as db:
+        with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
             cur = db.cursor()
 
@@ -118,7 +119,7 @@ class TableView(tk.Frame):
             icon="warning")
 
         if choice == "yes":
-            with sqlite3.connect("test.db") as db:
+            with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
                 cur = db.cursor()
 
@@ -141,8 +142,8 @@ class TableView(tk.Frame):
 
     def add_photos(self):
         self.details = filedialog.askopenfilenames(
-            initialdir="~",
-            title="Select file", filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
+            initialdir="..",
+            title="Select file", filetypes=[("Images", ".jpg .JPG .png")])
         record_num = self.rbuttons.get_int_var()
 
         image_names = ""
@@ -156,7 +157,7 @@ class TableView(tk.Frame):
             f"Are you sure you want to associate photos: \n\n{image_names}\nwith record: \n\n{self.controller.results[record_num]}")
 
         if choice == "yes":
-            with sqlite3.connect("test.db") as db:
+            with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
                 cur = db.cursor()
 
@@ -241,8 +242,11 @@ class AddForm(Form):
             row=10, column=1)
 
     def clear(self):
-        self.id.set(
-            str(self.controller.results[-1][0] + 1))
+        try:
+            self.id.set(
+                str(self.controller.results[-1][0] + 1))
+        except IndexError:
+            self.id.set(1)
         self.first_name.set("")
         self.last_name.set("")
         self.email.set("")
@@ -251,7 +255,7 @@ class AddForm(Form):
         choice = messagebox.askquestion(
             "dscsdf", "Are you sure you'd like to add a record with these details?\nPLEASE NOTE: You must add photos of this person for them to be recognised.")
         if choice == "yes":
-            with sqlite3.connect("test.db") as db:
+            with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
                 cur = db.cursor()
 
@@ -293,7 +297,7 @@ class EditForm(Form):
         choice = messagebox.askquestion(
             "Confirm", "Are you sure you'd like to confirm these changes?", icon="warning")
         if choice == "yes":
-            with sqlite3.connect("test.db") as db:
+            with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
                 cur = db.cursor()
 
@@ -334,7 +338,7 @@ class PhotoView(tk.Frame):
         self.images = tk.Frame(self)
         self.images.grid()
 
-        with sqlite3.connect("test.db") as db:
+        with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
             cur = db.cursor()
 
@@ -373,9 +377,9 @@ class PhotoView(tk.Frame):
 
     def open_image(self):
         image = self.image.get()
-        with open("image.jpg", "wb") as file:
+        with open(os.path.realpath("../temp_images/image.jpg"), "wb") as file:
             file.write(self.image_blobs[image][0])
-        im = Image.open("image.jpg")
+        im = Image.open(os.path.realpath("../temp_images/image.jpg"))
         im.show()
 
     def del_img(self):
@@ -383,7 +387,7 @@ class PhotoView(tk.Frame):
             "hello", "Are you sure you want to delete this photo?", icon="warning")
         if choice == "yes":
             image = self.image.get()
-            with sqlite3.connect("test.db") as db:
+            with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
                 cursor = db.cursor()
 

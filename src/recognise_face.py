@@ -1,16 +1,17 @@
-import argparse
 import face_recognition
 import pickle
 import cv2
 import os
 
+
 def recog():
 
     print("[INFO] loading encodings...")
-    data = pickle.load(open("encodings.p", "rb"))
+    data = pickle.load(
+        open(os.path.realpath("../encodings/encodings.p"), "rb"))
     print("[INFO] recognising faces")
 
-    image = cv2.imread("photo.jpg")
+    image = cv2.imread("../temp_images/photo.jpg")
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     boxes = face_recognition.face_locations(
@@ -43,6 +44,6 @@ def recog():
         cv2.putText(image, name, (left, y),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 0, 0), 2)
 
-    cv2.imwrite("photo.jpg", image)
+    cv2.imwrite(os.path.realpath("../temp_images/photo.jpg"), image)
 
     return name

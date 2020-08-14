@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import sqlite3
+import os
 
 
 class App(tk.Tk):
@@ -8,7 +9,7 @@ class App(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
-        with sqlite3.connect("logins.db") as db:
+        with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
 
             cursor = db.cursor()
 
@@ -52,7 +53,7 @@ class App(tk.Tk):
             self.old_frame = new_frame
 
     def update_logins(self):
-        with sqlite3.connect("logins.db") as db:
+        with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
 
             cur = db.cursor()
 
@@ -161,7 +162,7 @@ class Register(tk.Frame):
         self.email_con.set("")
         self.password.set("")
         self.password_con.set("")
-        with sqlite3.connect("logins.db") as db:
+        with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
 
             cursor = db.cursor()
 
