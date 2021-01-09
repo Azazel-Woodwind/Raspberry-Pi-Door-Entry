@@ -5,7 +5,7 @@ while true; do
     scan=`./433Utils/RPi_utils/RFSniffer.cpp`
     if [ "$scan" = "$valid" ]; then
         raspistill -o ../temp_images/photo.jpg -w 1024 -h 768 -q 30
-        python handle_image.py
+        python email_sender.py
         t=`date +%T`
         d=`date +%d%m%y`
         echo "Doorbell pressed $t $d"

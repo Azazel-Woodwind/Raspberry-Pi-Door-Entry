@@ -26,6 +26,8 @@ def encode():
     known_faces = []
     known_names = []
 
+    count = 1
+
     for data in result:
         load_image(data[0])
 
@@ -34,7 +36,12 @@ def encode():
         box = face_recognition.face_locations(
             image, model="hog")
         encoding = face_recognition.face_encodings(image, box)
-        known_faces.append(encoding[0])
+        try:
+            known_faces.append(encoding[0])
+        except:
+            print(f"NO FACE FOUND IN PHOTO {count}")
+            count += 1
+            continue
 
         with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 

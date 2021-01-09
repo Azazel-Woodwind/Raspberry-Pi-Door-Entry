@@ -5,14 +5,24 @@ from datetime import datetime
 import sqlite3
 import os
 import recognise_face
+import recognise_face_v2
 
 
 def send():
 
-    SENDER = os.environ.get("sender_email")
-    PASS = os.environ.get("sender_pass")
+    with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
 
-    name = recognise_face.recog()
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM sender")
+
+        result = cursor.fetchall()
+
+    SENDER = result[0][0]
+    PASS = result[0][1]
+
+    #name = recognise_face.recog()
+    name = recognise_face_v2.recog()
 
     with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
 

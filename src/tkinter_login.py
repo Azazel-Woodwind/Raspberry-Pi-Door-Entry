@@ -174,6 +174,71 @@ class Register(tk.Frame):
         messagebox.showinfo("fnsdind", "Register Success!")
         self.controller.update_logins()
         self.controller.show_frame("Login")
+        self.controller.first = False
+
+class Welcome(tk.Frame):
+
+    def __init__(self, parent, controller, *args, **kw):
+        tk.Frame.__init__(self, parent, *args, **kw)
+
+        self.controller = controller
+
+        self.email = tk.StringVar()
+        self.email_con = tk.StringVar()
+        self.password = tk.StringVar()
+        self.password_con = tk.StringVar()
+
+        self.widgets()
+
+    def widgets(self):
+        message1 = "As this is your first time, you are required to register an email that will be used\n\
+            to send important information to future registered users. This email must be a Google email\n\
+            and it is recommended that you create a new email to be used solely for this purpose.\n\
+            Otherwise, you are able to register a user using the same email that you have used here."
+
+        message2 = "As this email will be used to send emails, you must provide a working password to\n\
+            allow the software to login to your email. If you have two-factor authentication turned OFF,\n\
+            navigate to https://myaccount.google.com/lesssecureapps and turn less secure app access\n\
+            ON. Then, input your normal gmail password. If you have two-factor authentication turned ON,\n\
+            navigate to https://myaccount.google.com/apppasswords and create a password to be used here."
+
+        tk.Label(self, text="Welcome!", font=("Arial", 16, "bold")).grid()
+        tk.Label(self, text=message1).grid()
+        tk.Label(self, text="Email:").grid()
+        tk.Entry(self, textvariable = self.email).grid(sticky = "nsew")
+        tk.Label(self, text="Confirm email").grid()
+        tk.Entry(self, textvariable = self.email_con).grid(sticky="nsew")
+        tk.Label(self, text=message2).grid()
+        tk.Label(self, text="Password:").grid()
+        tk.Entry(self, textvariable=self.password, show="*").grid(sticky="nsew")
+        tk.Label(self, text="Confirm password:").grid()
+        tk.Entry(self, textvariable=self.password_con, show="*").grid(sticky="nsew")
+        tk.Button(self, text="Submit", command=self.check).grid()
+
+    def check(self):
+        message = ""
+        if self.email.get() != self.email_con.get():
+            message += "Emails do not match\n"
+        if self.password.get() != self.password_con.get():
+            message += "Passwords do not match\n"
+        if message == "":
+            self.save(self.email.get(), self.password.get())
+        else:
+            messagebox.showwarning("fdsf", message)
+
+    def save(self, email, pw):
+        with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
+            cur = db.cursor()
+
+            cur.execute("""INSERT INTO sender (email, password)
+                            VALUES (?, ?)""", (email, pw))
+            
+            db.commit()
+
+        self.controller.show_frame("Register")
+
+
+
 
 
 if __name__ == "__main__":

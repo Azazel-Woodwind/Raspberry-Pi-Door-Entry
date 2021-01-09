@@ -1,6 +1,6 @@
 import tkinter as tk
 import sqlite3
-from tkinter_login import Login, Register
+from tkinter_login import Login, Register, Welcome
 from tkinter_db_view import TableView, EditForm, AddForm, PhotoView, Form, RadioButtons, Options, Table
 import os
 
@@ -45,6 +45,10 @@ class App(tk.Tk):
                             password TEXT NOT NULL,
                             receive INTEGER NOT NULL)""")
 
+            cursor.execute("""CREATE TABLE IF NOT EXISTS sender (
+                            email TEXT NOT NULL,
+                            password TEXT NOT NULL)""")
+
             db.commit()
 
         self.update_details()
@@ -59,7 +63,7 @@ class App(tk.Tk):
 
         self.first = False if self.login_results else True
 
-        for f in (TableView, EditForm, AddForm, PhotoView, Login, Register):
+        for f in (TableView, EditForm, AddForm, PhotoView, Login, Register, Welcome):
             page_name = f.__name__
             frame = f(container, self)
             self.frames[page_name] = frame
@@ -69,8 +73,7 @@ class App(tk.Tk):
         if self.login_results:
             self.show_frame("Login")
         else:
-            self.show_frame("Register")
-            self.first = False
+            self.show_frame("Welcome")
 
     def update_details(self):
         with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
