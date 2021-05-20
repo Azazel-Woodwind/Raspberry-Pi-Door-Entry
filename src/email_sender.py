@@ -5,8 +5,6 @@ from datetime import datetime
 import sqlite3
 import os
 import recognise_face
-import recognise_face_v2
-
 
 def send():
 
@@ -21,8 +19,7 @@ def send():
     SENDER = result[0][0]
     PASS = result[0][1]
 
-    #name = recognise_face.recog()
-    name = recognise_face_v2.recog()
+    name = recognise_face.recog()
 
     with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
 
@@ -35,14 +32,14 @@ def send():
     msg = EmailMessage()
     msg["From"] = SENDER
     if name is None:
-        msg["Subject"] = f"{str(datetime.now())[:-7]} - NO FACE RECOGNISED AT DOOR"
+        msg["Subject"] = f"NO FACE RECOGNISED AT DOOR {str(datetime.now())[:-7]}"
         msg.set_content(
             "The camera did not recognise a face, but here is the photo it took:")
     elif name == "Unknown":
-        msg["Subject"] = f"{str(datetime.now())[:-7]} - UNKNOWN FACE RECOGNISED AT DOOR"
+        msg["Subject"] = f"UNKNOWN FACE RECOGNISED AT DOOR {str(datetime.now())[:-7]}"
         msg.set_content("Unknown face at the door:")
     else:
-        msg["Subject"] = f"{str(datetime.now())[:-7]} - {name} is at the door!"
+        msg["Subject"] = f"{name} is at the door! {str(datetime.now())[:-7]}"
 
         with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 

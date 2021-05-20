@@ -35,6 +35,14 @@ class App(tk.Tk):
 
             db.commit()
 
+        try:
+            file = open(os.path.realpath("../signal.txt"), "r")
+        except:
+            self.signal = False
+        else:
+            file.close()
+            self.signal = True
+
         self.update_details()
 
         container = tk.Frame(self)
@@ -44,7 +52,7 @@ class App(tk.Tk):
 
         self.frames = {}
 
-        for f in (TableView, EditForm, AddForm, PhotoView):
+        for f in (TableView, EditForm, AddForm, PhotoView, EditSignal):
             page_name = f.__name__
             frame = f(container, self)
             self.frames[page_name] = frame
@@ -78,6 +86,60 @@ class App(tk.Tk):
             blob = file.read()
         return blob
 
+class EditSignal(tk.Frame):
+
+    def __init__(self, parent, controller, **kw):
+        tk.Frame.__init__(self, parent, **kw)
+
+        self.controller = controller
+        self.signal = tk.StringVar()
+        self.signal_con = tk.StringVar()
+        self.instructions = "To use this device, the receiver must be calibrated with the signal generated\n" + \
+                        "from the doorbell. To do this, navigate to the terminal (ctrl+alt+t) and type the \n" + \
+                        "following command exactly: cd Raspberry-Pi-Door-Entry/src && ./receiver.sh\n" + \
+                        "Then, used the doorbell near the receiver, note the signal that is output on the \n" + \
+                        "screen and input it into the entries below. If you change your doorbell, \n" + \
+                        "you must do the same thing."
+
+        self.widgets()
+
+    def widgets(self):
+        tk.Label(self, text="Doorbell Signal", font=(
+            "Arial", 20, "bold"), padx=20).grid(columnspan=2)
+        tk.Label(self, text=self.instructions).grid(columnspan=2)
+        tk.Label(self, text="Signal:").grid(columnspan=2)
+        tk.Entry(self, textvariable=self.signal).grid(columnspan=2, sticky="nsew")
+        tk.Label(self, text="Confirm signal:").grid(columnspan=2)
+        tk.Entry(self, textvariable=self.signal_con).grid(columnspan=2, sticky="nsew")
+        self.submit = tk.Button(self, text="Submit", command=self.check)
+        self.go_back = tk.Button(self, text="Go back", command=lambda: self.controller.show_frame(
+            "TableView"))
+        if self.controller.signal:
+            self.go_back.grid(row=6, column=0)
+            self.submit.grid(row=6, column=1)
+        else:
+            self.submit.grid(columnspan=2)
+
+    def check(self):
+        if self.signal.get() == self.signal_con.get():
+            self.write_signal()
+        else:
+            messagebox.showwarning("No", "Signals must match")
+
+    def write_signal(self):
+        with open(os.path.realpath("../signal.txt"), "w") as file:
+            file.write(str(self.signal.get()))
+
+        messagebox.showinfo("Nice", "Signal registered successfully!")
+        self.controller.show_frame("TableView")
+
+        self.signal.set("")
+        self.signal_con.set("")
+        if not self.go_back.winfo_ismapped():
+            self.submit.grid_forget()
+            self.go_back.grid(row=6, column=0)
+            self.submit.grid(row=6, column=1)
+
 
 class TableView(tk.Frame):
 
@@ -85,9 +147,15 @@ class TableView(tk.Frame):
         tk.Frame.__init__(self, parent, **kw)
 
         self.controller = controller
-
-        tk.Button(self, text="Register another user",
-                  command=lambda: self.controller.show_frame("Register")).grid(sticky="w")
+        
+        buttons = tk.Frame(self)
+        buttons.grid(sticky="w")
+        tk.Button(buttons, text="Register another user",
+                  command=lambda: self.controller.show_frame("Register")).grid(
+                      row=0, column=0, sticky="w")
+        tk.Button(buttons, text="Edit doorbell signal", command=lambda: self.controller.show_frame(
+            "EditSignal")).grid(row=0, column=1, sticky="w")
+        tk.Button(buttons, text="Need help? Click me", command=self.help).grid(row=0, column=2, sticky="w")
 
         self.draw_table()
 
@@ -128,7 +196,7 @@ class TableView(tk.Frame):
                 db.commit()
 
                 cur.execute("DELETE FROM people WHERE person_id = ?",
-                            (self.rbuttons.get_int_var()+1,))
+                            (self.controller.results[self.rbuttons.get_int_var()][0],))
 
                 db.commit()
 
@@ -154,7 +222,8 @@ class TableView(tk.Frame):
 
         choice = messagebox.askquestion(
             "Add photos",
-            f"Are you sure you want to associate photos: \n\n{image_names}\nwith record: \n\n{self.controller.results[record_num]}")
+            f"Are you sure you want to associate photos: \n\n\
+                    {image_names}\nwith record: \n\n{self.controller.results[record_num]}")
 
         if choice == "yes":
             with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
@@ -174,19 +243,35 @@ class TableView(tk.Frame):
 
                     db.commit()
 
-            messagebox.showinfo("efew", "Photos added successfully!")
+            messagebox.showinfo("Nice", "Photos added successfully!")
 
     def encode(self):
         choice = messagebox.askquestion(
-            "adfs", "Are you sure you'd like to update encodings with current data?")
+            "Ok", "Are you sure you'd like to update encodings with current data?")
 
         if choice == "yes":
             info = tk.Label(self, text="Encoding faces...")
             info.grid()
             self.controller.update()
             encode_faces.encode()
-            messagebox.showinfo("dsf", "faces encoded successfully!")
+            messagebox.showinfo("Nice", "faces encoded successfully!")
             info.destroy()
+
+    def help(self):
+        message=\
+            "ADD RECORD: This is the first button you want to use. This allows you to add the details of someone " + \
+            "that you want to be recognised at the door.\nDELETE RECORD: This button can only be used when you " + \
+            "select a record using the circular buttons at the side of them, and deletes the record you picked\n" + \
+            "EDIT RECORD: This button allows you to edit the details of any record you picked with the cirular " + \
+            "buttons.\nADD PHOTOS: This button brings you to your files and allows you to add images of the " + \
+            "selected person to their record. This is needed if you want them to be recognised, and ideally, " + \
+            "you should try to add 10 clear images of the person at different views and angles.\nVIEW PHOTOS: " + \
+            "This button allows you to view and delete the photos that you added to the selected record.\n" + \
+            "ENCODE DATA: This is a very important button. Whenever you add photos to any record, you must press " + \
+            "this button sometime after or the images added will not be used when a photo is taken at the doorbell. " + \
+            "Don't worry if this takes some time, as this is normal.\nREGISTER ANOTHER USER: This allows you to " + \
+            "add another login so someone else can use the database and receive emails."            
+        messagebox.showinfo("Help", message)
 
 
 class Form(tk.Frame):
@@ -241,19 +326,10 @@ class AddForm(Form):
         tk.Button(self, text="Add", command=self.add_record).grid(
             row=10, column=1)
 
-    def clear(self):
-        try:
-            self.id.set(
-                str(self.controller.results[-1][0] + 1))
-        except IndexError:
-            self.id.set(1)
-        self.first_name.set("")
-        self.last_name.set("")
-        self.email.set("")
-
     def add_record(self):
         choice = messagebox.askquestion(
-            "dscsdf", "Are you sure you'd like to add a record with these details?\nPLEASE NOTE: You must add photos of this person for them to be recognised.")
+            "Choice", "Are you sure you'd like to add a record with these details?\n\
+                    PLEASE NOTE: You must add photos of this person for them to be recognised.")
         if choice == "yes":
             with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
@@ -268,11 +344,20 @@ class AddForm(Form):
 
                 db.commit()
 
-            messagebox.showinfo("efew", "Record added successfully!")
+            messagebox.showinfo("Success", "Record added successfully!")
 
             self.controller.update_details()
             self.controller.frames["TableView"].refresh()
             self.controller.show_frame("TableView")
+            self.first_name.set("")
+            self.last_name.set("")
+            self.email.set("")
+
+    def update_id(self):
+        try:
+            self.id.set(self.controller.results[-1][0] + 1)
+        except IndexError:
+            self.id.set(1)
 
 
 class EditForm(Form):
@@ -406,10 +491,12 @@ class Table(tk.Frame):
 
         self["background"] = "black"
 
+        #add headings
         for column, heading in enumerate(["Unique ID", "Forename", "Surname", "Email Address"]):
             tk.Label(self, text=heading, font=("Arial", 20, "bold"), padx=25).grid(
                 row=0, column=column, padx=1, pady=1, sticky="nsew")
 
+        #add information
         for row, record in enumerate(controller.results, start=1):
             for column, detail in enumerate(record):
                 tk.Label(self, text=detail, anchor="w", font=("Arial", 14)).grid(
@@ -422,7 +509,7 @@ class RadioButtons(tk.Frame):
         tk.Frame.__init__(self, parent, **kw)
 
         self.var = tk.IntVar()
-        self.var.set(-1)
+        self.var.set(-1) 
 
         tk.Label(self, text="", font=(
             "Arial", 20, "bold")).grid(pady=1)
@@ -444,15 +531,17 @@ class Options(tk.Frame):
         self.parent = parent
         self.isDark = True
 
-        tk.Button(self, text="Encode data",
-                  command=self.parent.encode).grid(row=0, column=0, padx=5)
 
         tk.Button(self, text="Add Record",
-                  command=lambda: [controller.frames["AddForm"].clear(), controller.show_frame("AddForm")]).grid(row=0, column=1, padx=5)
+                  command=lambda: [controller.frames["AddForm"].update_id(), 
+                    controller.show_frame("AddForm")]).grid(row=0, column=0, padx=5)
 
-        for column, text in enumerate(["Delete Record", "Edit Record", "Add Photos", "View Photos"], start=2):
+        for column, text in enumerate(["Delete Record", "Edit Record", "Add Photos", "View Photos"], start=1):
             tk.Label(self, text=text, bg="gray40",
                      fg="gray25", padx=10, pady=4).grid(row=0, column=column, padx=5)
+                    
+        tk.Button(self, text="Encode data",
+            command=self.parent.encode).grid(row=0, column=5, padx=5)
 
     def highlight_button(self):
         for column, text in enumerate([("Delete Record", self.parent.del_record),
@@ -461,7 +550,7 @@ class Options(tk.Frame):
                                        ("Add Photos", self.parent.add_photos),
                                        ("View Photos",
                                         lambda: [self.controller.frames["PhotoView"].update(),
-                                                 self.controller.show_frame("PhotoView")])], start=2):
+                                                 self.controller.show_frame("PhotoView")])], start=1):
             tk.Button(self, text=text[0], command=text[1]).grid(
                 row=0, column=column)
 

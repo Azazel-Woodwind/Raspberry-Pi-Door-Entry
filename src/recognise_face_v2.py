@@ -11,15 +11,11 @@ def recog():
         open(os.path.realpath("../encodings/encodings.p"), "rb"))
     print("[INFO] recognising faces")
 
-    detector = cv2.CascadeClassifier("../haarcascade_frontalface_default.xml")
-
     image = cv2.imread("../temp_images/photo.jpg")
-    grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    rects = detector.detectMultiScale(grey, scaleFactor = 1.1, 
-        minNeighbors=5, minSize=(30,30))
-    boxes = [(y, x + w, y + h, x) for (x, y, w, h) in rects]
+    boxes = face_recognition.face_locations(
+        image, model="hog")
     encodings = face_recognition.face_encodings(image, boxes)
 
     name = None

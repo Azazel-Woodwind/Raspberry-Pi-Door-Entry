@@ -92,6 +92,8 @@ connects to GPIO 27 (which in WiringPi-speak is confusingly referred to as GPIO 
 The blue wire in the picture is an optional antenna wire, which should be 17.3cm long & can be
 coiled around a biro so it takes up less space. It is optional and generally not needed unless large distance transmissions are required.
 
+To connect the camera module, follow the instructions [here](https://projects.raspberrypi.org/en/projects/getting-started-with-picamera/2)
+
 - Then, navigate to 433Utils/RPi_utils and run `./test.sh`. Activate your doorbell and take note of the code.
 - Navigate to shell_scripts/receiver.sh and change "(device code)" to the code you took note of.
 - You're ready to go! Position your Raspberry Pi as suitable and run `src/receiver.sh` in the background. **If this errors, replace `python` with `python3` if you aren't running a virtual environment, however I recommend that you use one.** Then press your doorbell whenever you're ready, have your email open and watch the magic happen!

@@ -1,7 +1,7 @@
 #!/bin/sh
 
+valid=$(cat ../signal.txt)
 while true; do
-    valid="(device code)"
     scan=`./433Utils/RPi_utils/RFSniffer.cpp`
     if [ "$scan" = "$valid" ]; then
         raspistill -o ../temp_images/photo.jpg -w 1024 -h 768 -q 30

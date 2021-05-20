@@ -35,3 +35,10 @@ Version 1.1:
 
 Version 1.1.1:
  - Added READMEs to empty directories for later use
+
+Version 2.0:
+- Added validation in all required areas
+- Fixed bugs and logic errors
+- Added "edit signal" button to input the doorbell code
+- Added "help" button
+- Changed order of buttons

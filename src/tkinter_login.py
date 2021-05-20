@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import sqlite3
 import os
+import re
 
 
 class App(tk.Tk):
@@ -84,18 +85,26 @@ class Login(tk.Frame):
         tk.Button(self, text="Sign in", command=self.login).grid()
 
     def login(self):
+        #fetch inputs
         email = self.email.get()
         pw = self.password.get()
-        self.email.set("")
-        self.password.set("")
+        #set flag as not found
         found = False
+        #loop through login details
         for record in self.controller.login_results:
+            #if match
             if record[0] == email and record[1] == pw:
+                #set flag to found
                 found = True
-                messagebox.showinfo("sdnif", "Login success!")
-                self.controller.show_frame("TableView")
+                messagebox.showinfo("Success", "Login success!")
+                if self.controller.signal:
+                    self.controller.show_frame("TableView")
+                else:
+                    self.controller.show_frame("EditSignal")
+                self.email.set("")
+                self.password.set("")
         if not found:
-            messagebox.showinfo("bdfiw", "Incorrect username or password")
+            messagebox.showwarning("Failure", "Incorrect username or password")
 
 
 class Register(tk.Frame):
@@ -132,28 +141,25 @@ class Register(tk.Frame):
                        variable=self.var, value=1).grid(columnspan=2)
         tk.Radiobutton(self, text="Do not receive an email when someone press doorbell",
                        variable=self.var, value=0).grid(columnspan=2)
-        if not self.controller.first:
-            tk.Button(self, text="Go back", command=lambda: self.controller.show_frame(
-                "TableView")).grid(row=12, column=0)
-            tk.Button(self, text="Register", command=self.check).grid(
-                row=12, column=1)
+        self.reg_button = tk.Button(self, text="Register", command=self.check)
+        self.go_back = tk.Button(self, text="Go back", command=lambda: self.controller.show_frame(
+            "TableView"))
+        if self.controller.login_results:
+            self.go_back.grid(row=12, column=0)
+            self.reg_button.grid(row=12, column=1)
         else:
-            tk.Button(self, text="Register",
-                      command=self.check).grid(columnspan=2)
+            self.reg_button.grid(columnspan=2)
+
 
     def check(self):
-        message = ""
-        if self.email.get() != self.email_con.get():
-            message += "Emails do not match\n"
-        if self.password.get() != self.password_con.get():
-            message += "Passwords do not match\n"
+        message = self.controller.validate(self.email.get(), self.email_con.get(),\
+            self.password.get(), self.password_con.get())
         if self.var.get() == -1:
-            message += "Please select whether you would like to receive emails"
-
-        if message == "":
-            self.register()
+            message += "\nPlease select whether you would like to receive emails"
+        if message:
+            messagebox.showwarning("Warning", message)
         else:
-            messagebox.showwarning("fdsf", message)
+            self.register()
 
     def register(self):
         email = self.email.get()
@@ -162,6 +168,7 @@ class Register(tk.Frame):
         self.email_con.set("")
         self.password.set("")
         self.password_con.set("")
+        self.var.set(-1)
         with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
 
             cursor = db.cursor()
@@ -171,10 +178,15 @@ class Register(tk.Frame):
 
             db.commit()
 
-        messagebox.showinfo("fnsdind", "Register Success!")
+        messagebox.showinfo("Well done", "Register Success!")
         self.controller.update_logins()
         self.controller.show_frame("Login")
-        self.controller.first = False
+
+        if not self.go_back.winfo_ismapped():
+            self.reg_button.grid_forget()
+            self.go_back.grid(row=12, column=0)
+            self.reg_button.grid(row=12, column=1)
+
 
 class Welcome(tk.Frame):
 
@@ -216,15 +228,14 @@ class Welcome(tk.Frame):
         tk.Button(self, text="Submit", command=self.check).grid()
 
     def check(self):
-        message = ""
-        if self.email.get() != self.email_con.get():
-            message += "Emails do not match\n"
-        if self.password.get() != self.password_con.get():
-            message += "Passwords do not match\n"
-        if message == "":
-            self.save(self.email.get(), self.password.get())
+        message = self.controller.validate(self.email.get(), self.email_con.get(),
+            self.password.get(), self.password_con.get(), False)
+        if message:
+            messagebox.showwarning("Warning", message)
         else:
-            messagebox.showwarning("fdsf", message)
+            messagebox.showinfo("Well done", "Your sender email was successfully registered!")
+            self.save(self.email.get(), self.password.get())
+                
 
     def save(self, email, pw):
         with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
@@ -236,9 +247,6 @@ class Welcome(tk.Frame):
             db.commit()
 
         self.controller.show_frame("Register")
-
-
-
 
 
 if __name__ == "__main__":
