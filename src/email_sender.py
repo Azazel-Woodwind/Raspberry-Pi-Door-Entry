@@ -51,7 +51,8 @@ def send():
             details = cursor.fetchall()
 
         msg.set_content(
-            f"First Name: {details[0][1]}\nLast Name: {details[0][2]}\nEmail Address: {details[0][3]}\nHere is the photo we took:")
+            f"First Name: {details[0][1]}\nLast Name: {details[0][2]}\n" + \
+                f"Email Address: {details[0][3]}\nPhone Number: {details[0][4]}\nHere is the photo we took:")
 
     with open(os.path.realpath("../temp_images/photo.jpg"), "rb") as file:
         data = file.read()

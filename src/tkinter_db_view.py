@@ -101,6 +101,12 @@ class EditSignal(tk.Frame):
                         "screen and input it into the entries below. If you change your doorbell, \n" + \
                         "you must do the same thing."
 
+        # self.instructions = "To use this device, the receiver must be calibrated with the signal generated\n" + \
+        #                 "from the doorbell. To do this, run receiver.sh in the src folder.\n" + \
+        #                 "Then, used the doorbell near the receiver, note the signal that is output on the \n" + \
+        #                 "screen and input it into the entries below. If you change your doorbell, \n" + \
+        #                 "you must do the same thing."
+
         self.widgets()
 
     def widgets(self):
@@ -121,10 +127,16 @@ class EditSignal(tk.Frame):
             self.submit.grid(columnspan=2)
 
     def check(self):
-        if self.signal.get() == self.signal_con.get():
-            self.write_signal()
+        signal = self.signal.get()
+        signal_con = self.signal_con.get()
+
+        if len(signal) == 0 or len(signal_con) == 0:
+            messagebox.showwarning("Angry", "Please enter signals")
         else:
-            messagebox.showwarning("No", "Signals must match")
+            if self.signal.get() == self.signal_con.get():
+                self.write_signal()
+            else:
+                messagebox.showwarning("No", "Signals must match")
 
     def write_signal(self):
         with open(os.path.realpath("../signal.txt"), "w") as file:
@@ -200,8 +212,8 @@ class TableView(tk.Frame):
 
                 db.commit()
 
-        self.controller.update_details()
-        self.refresh()
+            self.controller.update_details()
+            self.refresh()
 
     def update_edit_form(self):
         record_num = self.rbuttons.get_int_var()
@@ -254,7 +266,7 @@ class TableView(tk.Frame):
             info.grid()
             self.controller.update()
             encode_faces.encode()
-            messagebox.showinfo("Nice", "faces encoded successfully!")
+            messagebox.showinfo("Nice", "Faces encoded successfully!")
             info.destroy()
 
     def help(self):
@@ -286,6 +298,7 @@ class Form(tk.Frame):
         self.first_name = tk.StringVar()
         self.last_name = tk.StringVar()
         self.email = tk.StringVar()
+        self.phone_num = tk.StringVar()
 
         self.widgets()
 
@@ -303,8 +316,11 @@ class Form(tk.Frame):
         tk.Label(self, text="Email Address:").grid(columnspan=2)
         tk.Entry(self, textvariable=self.email).grid(
             columnspan=2, sticky="nsew")
+        tk.Label(self, text="Phone Number:").grid(columnspan=2)
+        tk.Entry(self, textvariable=self.phone_num).grid(
+            columnspan=2, sticky="nsew")
         tk.Button(self, text="Cancel", command=self.cancel).grid(
-            row=10, column=0)
+            row=12, column=0)
 
     def cancel(self):
         choice = messagebox.askquestion(
@@ -312,6 +328,26 @@ class Form(tk.Frame):
 
         if choice == "yes":
             self.controller.show_frame("TableView")
+    
+    def validate(self):
+        message = ""
+
+        if not self.first_name.get():
+            message += "Please fill in a first name\n"
+        if not self.last_name.get():
+            message += "Please fill in a surname\n"
+        if not self.email.get():
+            message += "Please fill in an email\n"
+        else:
+            if not self.controller.is_valid(self.email.get()):
+                message += "Please enter a valid email\n"
+        if not self.phone_num.get():
+            message += "Please fill in a phone number\n"
+        else:
+            if len(self.phone_num.get()) != 11 or not self.phone_num.get().isnumeric():
+                message += "Please enter an 11 digit phone number"
+
+        return message
 
 
 class AddForm(Form):
@@ -323,13 +359,20 @@ class AddForm(Form):
 
         self.title.set("ADD RECORD")
 
-        tk.Button(self, text="Add", command=self.add_record).grid(
-            row=10, column=1)
+        tk.Button(self, text="Add", command=self.check).grid(
+            row=12, column=1)
+
+    def check(self):
+        message = self.validate()
+        if not message:
+            self.add_record()
+        else:
+            messagebox.showerror("Bad", message)
 
     def add_record(self):
         choice = messagebox.askquestion(
-            "Choice", "Are you sure you'd like to add a record with these details?\n\
-                    PLEASE NOTE: You must add photos of this person for them to be recognised.")
+            "Choice", "Are you sure you'd like to add a record with these details?\n" + \
+                    "PLEASE NOTE: You must add photos of this person for them to be recognised.")
         if choice == "yes":
             with sqlite3.connect(os.path.realpath("../databases/authorised_persons.db")) as db:
 
@@ -339,8 +382,9 @@ class AddForm(Form):
 
                 db.commit()
 
-                cur.execute("""INSERT INTO people (first_name, last_name, email)
-                                VALUES (?, ?, ?)""", (self.first_name.get(), self.last_name.get(), self.email.get()))
+                cur.execute("""INSERT INTO people (first_name, last_name, email, phone_num)
+                                VALUES (?, ?, ?, ?)""", (self.first_name.get(), self.last_name.get(), 
+                                                        self.email.get(), self.phone_num.get()))
 
                 db.commit()
 
@@ -352,6 +396,7 @@ class AddForm(Form):
             self.first_name.set("")
             self.last_name.set("")
             self.email.set("")
+            self.phone_num.set("")
 
     def update_id(self):
         try:
@@ -370,13 +415,21 @@ class EditForm(Form):
         self.title.set("ENTER CHANGES")
 
         tk.Button(self, text="Confirm Changes",
-                  command=self.edit).grid(row=10, column=1)
+                  command=self.check).grid(row=12, column=1)
 
     def update(self):
         record_num = self.controller.frames["TableView"].rbuttons.get_int_var()
         record = self.controller.results[record_num]
-        for detail, field in zip(record, (self.id, self.first_name, self.last_name, self.email)):
+        for detail, field in zip(record, (self.id, self.first_name, 
+                                self.last_name, self.email, self.phone_num)):
             field.set(detail)
+
+    def check(self):
+        message = self.validate()
+        if message:
+            messagebox.showerror("Again", message)
+        else:
+            self.edit()
 
     def edit(self):
         choice = messagebox.askquestion(
@@ -389,9 +442,11 @@ class EditForm(Form):
                 cur.execute("""UPDATE people
                                 SET first_name = ?,
                                     last_name = ?,
-                                    email = ?
+                                    email = ?,
+                                    phone_num = ?
                                 WHERE person_id = ?""",
-                            (self.first_name.get(), self.last_name.get(), self.email.get(), self.id.get()))
+                            (self.first_name.get(), self.last_name.get(), self.email.get(), 
+                            self.phone_num.get(), self.id.get()))
 
                 db.commit()
 
@@ -492,7 +547,7 @@ class Table(tk.Frame):
         self["background"] = "black"
 
         #add headings
-        for column, heading in enumerate(["Unique ID", "Forename", "Surname", "Email Address"]):
+        for column, heading in enumerate(["Unique ID", "Forename", "Surname", "Email Address", "Phone Number"]):
             tk.Label(self, text=heading, font=("Arial", 20, "bold"), padx=25).grid(
                 row=0, column=column, padx=1, pady=1, sticky="nsew")
 

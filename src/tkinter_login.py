@@ -155,7 +155,7 @@ class Register(tk.Frame):
         message = self.controller.validate(self.email.get(), self.email_con.get(),\
             self.password.get(), self.password_con.get())
         if self.var.get() == -1:
-            message += "\nPlease select whether you would like to receive emails"
+            message += "Please select whether you would like to receive emails"
         if message:
             messagebox.showwarning("Warning", message)
         else:
@@ -164,11 +164,6 @@ class Register(tk.Frame):
     def register(self):
         email = self.email.get()
         password = self.password.get()
-        self.email.set("")
-        self.email_con.set("")
-        self.password.set("")
-        self.password_con.set("")
-        self.var.set(-1)
         with sqlite3.connect(os.path.realpath("../databases/logins.db")) as db:
 
             cursor = db.cursor()
@@ -181,6 +176,11 @@ class Register(tk.Frame):
         messagebox.showinfo("Well done", "Register Success!")
         self.controller.update_logins()
         self.controller.show_frame("Login")
+        self.email.set("")
+        self.email_con.set("")
+        self.password.set("")
+        self.password_con.set("")
+        self.var.set(-1)
 
         if not self.go_back.winfo_ismapped():
             self.reg_button.grid_forget()

@@ -6,7 +6,10 @@
 *.Identifier
 !Pi_diagram.png
 *.db
+*.txt
 notes
 testing.py
 .vscode
 sqlite_tests.py
+test_photo.sh
+signal.txt

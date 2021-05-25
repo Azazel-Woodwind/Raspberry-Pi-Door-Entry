@@ -1,7 +1,7 @@
 import tkinter as tk
 import sqlite3
 from tkinter_login import Login, Register, Welcome
-from tkinter_db_view import EditSignal, TableView, EditForm, AddForm, PhotoView, Form, RadioButtons, Options, Table
+from tkinter_db_view import EditSignal, TableView, EditForm, AddForm, PhotoView
 import os
 import re
 
@@ -21,7 +21,8 @@ class App(tk.Tk):
                             person_id INTEGER PRIMARY KEY,
                             first_name TEXT,
                             last_name TEXT,
-                            email TEXT
+                            email TEXT,
+                            phone_num TEXT
                             )""")
 
             db.commit()
@@ -147,30 +148,32 @@ class App(tk.Tk):
             self.login_results = cur.fetchall()
 
     @staticmethod
-    def validate(email, email_con, pw, pw_con, reg=True):
+    def is_valid(email):
+        return re.search(".+@.+\..+", email)
+
+    def validate(self, email, email_con, pw, pw_con, reg=True):
         message = ""
 
-        #first checks if any fields empty
-        if not email or not email_con or not pw or not pw_con:
-            return "Please fill in the required fields"
+        if not email or not email_con:
+            message += "Please fill in emails\n"
         else:
-            #checks if the confirm fields match original
             if email != email_con:
                 message += "Emails do not match\n"
             else:
-                #if so, validate that a real email with regex format checking
-                if not re.search(".+@.+\..+", email):
+                if not self.is_valid(email):
                     message += "Enter a valid email\n"
-            #same with password
+        if not pw or not pw_con:
+            message += "Please fill in passwords\n"
+        else:
             if pw != pw_con:
                 message += "Passwords do not match\n"
             else:
-                if not reg:
-                    return message
-                #length check
-                if not (8 <= len(pw) <= 20):
-                    message += "Password must be between 8 and 20 characters long\n"
-                #format check
+                if reg:
+                    if not (8 <= len(pw) <= 20):
+                        message += "Password must be between 8 and 20 characters long inclusive\n"
+                else:
+                    if len(pw) < 8:
+                        message += "Password must be at least 8 characters long\n"
                 upper=lower=spc=num=False
                 for ch in pw:
                     if ch.isupper():
@@ -181,9 +184,13 @@ class App(tk.Tk):
                         num = True
                     else:
                         spc = True
-                if not (upper and lower and spc and num):
-                    message += "Password must contain at least 1 lowercase letter," +\
-                        "1 upper case letter, 1 number and 1 special character"
+                if reg:
+                    if not (upper and lower and spc and num):
+                        message += "Password must use a mix of upper case, lower case, " +\
+                                    "numeric and symbolic characters"
+                else:
+                    if not((upper or lower) and spc and num):
+                        message += "Password must use a mix of letters, numbers and symbols"
         return message
                 
 if __name__ == "__main__":

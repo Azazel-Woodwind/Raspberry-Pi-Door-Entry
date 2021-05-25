@@ -42,3 +42,6 @@ Version 2.0:
 - Added "edit signal" button to input the doorbell code
 - Added "help" button
 - Changed order of buttons
+
+Version 2.0.1:
+- Fixed bugs
